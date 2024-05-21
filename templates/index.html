@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        #message-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #message-list li {
+            padding: 5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        #message-form {
+            display: flex;
+            border-top: 1px solid #ccc;
+            padding: 10px;
+        }
+        #message-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #message-form button {
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <ul id="message-list"></ul>
+</div>
+<form id="message-form">
+    <input type="text" id="message-input" placeholder="Type your message here" autocomplete="off">
+    <button type="submit">Send</button>
+</form>
+
+<script>
+    const ws = new WebSocket('ws://127.0.0.1:8000/{{room_id}}/'); // Replace with your WebSocket server address
+    const username=prompt("Enter the username")
+
+    ws.onopen = () => {
+        var data={username:username,message:"Joined the chat"}
+        ws.send(JSON.stringify(data))
+        console.log('Connected to the server');
+    };
+
+    ws.onmessage = (event) => {
+        const messageList = document.getElementById('message-list');
+        const messageItem = document.createElement('li');
+        var data=JSON.parse(event.data)
+
+        messageItem.textContent = `${data.username}:${data.message}`;
+        messageList.appendChild(messageItem);
+    };
+
+    ws.onclose = () => {
+        var data={username:username,message:"Left the chat"}
+        ws.send(JSON.stringify(data))
+        console.log('Disconnected from the server');
+    };
+
+    document.getElementById('message-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const input = document.getElementById('message-input');
+        const message = input.value;
+        var data={username:username,message:message}
+        ws.send(JSON.stringify(data))
+        input.value = '';
+    });
+</script>
+
+</body>
+</html>
