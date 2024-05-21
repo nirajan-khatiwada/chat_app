@@ -61,7 +61,8 @@
 </form>
 
 <script>
-    const ws = new WebSocket('ws://127.0.0.1:8000/{{room_id}}/'); // Replace with your WebSocket server address
+    const ws = new WebSocket(`ws://${window.location.hostname}:8000/{{room_id}}/`); 
+    //Replace with your WebSocket server address
     const username=prompt("Enter the username")
 
     ws.onopen = () => {
